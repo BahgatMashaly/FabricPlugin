@@ -307,9 +307,36 @@
     [[Crashlytics sharedInstance] recordError:error];
 }
 
+
+-(void)customeExeption:(CDVInvokedUrlCommand*)command
+{
+    NSNumber *defaultCode = [NSNumber numberWithInt:-1];
+
+    NSArray *frame_array=[command argumentAtIndex:1 withDefault:defaultCode] ;
+    NSString *message_reason=[command argumentAtIndex:0 withDefault:defaultCode] ;
+
+    NSMutableArray *cls_frames = [[NSMutableArray alloc] init];
+    
+    if(frame_array) {
+        for (NSDictionary *dict in frame_array) {
+            CLSStackFrame *frame = [CLSStackFrame stackFrame];
+            [frame setFileName: dict[@"fileName"]];
+            [frame setLineNumber: [dict[@"lineNumber"] intValue]];
+            [frame setOffset: [dict[@"columnNumber"] intValue]];
+            [frame setSymbol: dict[@"functionName"]];
+            [cls_frames addObject: frame];
+        }
+        [[Crashlytics sharedInstance] recordCustomExceptionName:@"com.sarriaroman.fabric.JavaScriptException" reason:message_reason  frameArray:cls_frames];
+    }
+}
+
+
 - (void)sendNonFatalCrash:(CDVInvokedUrlCommand*)command
 {
-    [self recordError: command];
+    [self customeExeption: command];
 }
 
 @end
+
+
+
